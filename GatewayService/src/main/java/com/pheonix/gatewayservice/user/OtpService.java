@@ -38,11 +38,17 @@ public class OtpService {
     }
 
     private void sendEmail(String to, String otp) {
-        org.springframework.mail.SimpleMailMessage message = new org.springframework.mail.SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject("Your OTP Code");
-        message.setText("Your OTP code is: " + otp);
-        javaMailSender.send(message);
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                org.springframework.mail.SimpleMailMessage message = new org.springframework.mail.SimpleMailMessage();
+                message.setTo(to);
+                message.setSubject("Your OTP Code");
+                message.setText("Your OTP code is: " + otp);
+                javaMailSender.send(message);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public boolean validateOtp(String email, String otp) {

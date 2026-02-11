@@ -1,6 +1,7 @@
 package com.pheonix.gatewayservice.user;
 
 import com.pheonix.gatewayservice.asset.JWTResponse;
+import com.pheonix.gatewayservice.asset.Login;
 import com.pheonix.gatewayservice.asset.LoginRequest;
 import com.pheonix.gatewayservice.asset.Role;
 import com.pheonix.gatewayservice.repository.UserEntity;
@@ -41,7 +42,7 @@ public class UserLoginService {
         return "User created";
     }
 
-    ResponseEntity<JWTResponse> authenticate(LoginRequest loginRequest) {
+    ResponseEntity<JWTResponse> authenticate(Login loginRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
         String token = createToken(authentication);
         return ResponseEntity.ok(new JWTResponse(token));

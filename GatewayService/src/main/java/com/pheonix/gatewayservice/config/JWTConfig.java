@@ -33,6 +33,7 @@ public class JWTConfig {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http.csrf(ServerHttpSecurity.CsrfSpec::disable);
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         http.authorizeExchange(exchange -> exchange
                 .pathMatchers("/create/account/**",
                               "/login/account/**",
@@ -42,6 +43,19 @@ public class JWTConfig {
                 .anyExchange().authenticated());
         http.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
         return http.build();
+    }
+
+    @Bean
+    public org.springframework.web.cors.reactive.CorsConfigurationSource corsConfigurationSource() {
+        org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:5173");
+        configuration.addAllowedOrigin("http://localhost:5174");
+        configuration.addAllowedOrigin("http://localhost:5175");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+        org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean

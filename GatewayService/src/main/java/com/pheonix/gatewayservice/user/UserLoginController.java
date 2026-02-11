@@ -1,6 +1,8 @@
 package com.pheonix.gatewayservice.user;
 
+import com.pheonix.gatewayservice.asset.ApiResponse;
 import com.pheonix.gatewayservice.asset.JWTResponse;
+import com.pheonix.gatewayservice.asset.Login;
 import com.pheonix.gatewayservice.asset.LoginRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,16 +27,15 @@ public class UserLoginController {
     }
 
     @PostMapping("/login/account")
-    public ResponseEntity<JWTResponse> login(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<JWTResponse> login(@RequestBody Login loginRequest){
         return userLoginService.authenticate(loginRequest);
     }
 
     @PostMapping("/generate-otp")
-    public String generateOtp(@RequestParam String email) {
+    public ResponseEntity<ApiResponse> generateOtp(@RequestParam String email) {
         otpService.generateOtp(email);
-        return "OTP sent to " + email;
+        return ResponseEntity.ok(new ApiResponse("OTP sent to " + email, true));
     }
-
     @PutMapping("/reset/password")
     public String resetPassword(@RequestParam String email, @RequestParam String newPassword, @RequestParam String otp) {
         if (otpService.validateOtp(email, otp)) {
