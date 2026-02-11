@@ -34,15 +34,13 @@ public class JWTConfig {
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http.csrf(ServerHttpSecurity.CsrfSpec::disable);
         http.authorizeExchange(exchange -> exchange
-                .pathMatchers("/h2-console/**",
-                              "/create/account/**",
+                .pathMatchers("/create/account/**",
                               "/login/account/**",
                               "/generate-otp",
                               "/reset/password"
                 ).permitAll()
                 .anyExchange().authenticated());
         http.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-        http.headers(header -> header.frameOptions(ServerHttpSecurity.HeaderSpec.FrameOptionsSpec::disable));
         return http.build();
     }
 
