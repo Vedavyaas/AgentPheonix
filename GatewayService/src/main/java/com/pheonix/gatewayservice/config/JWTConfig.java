@@ -36,7 +36,9 @@ public class JWTConfig {
         http.authorizeExchange(exchange -> exchange
                 .pathMatchers("/h2-console/**",
                               "/create/account/**",
-                              "/login/account/**"
+                              "/login/account/**",
+                              "/generate-otp",
+                              "/reset/password"
                 ).permitAll()
                 .anyExchange().authenticated());
         http.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));

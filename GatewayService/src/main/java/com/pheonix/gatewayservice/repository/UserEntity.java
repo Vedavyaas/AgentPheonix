@@ -1,27 +1,28 @@
 package com.pheonix.gatewayservice.repository;
 
 import com.pheonix.gatewayservice.asset.Role;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(unique = true)
     private String username;
     private String password;
+    @Column(unique = true)
+    private String email;
     private Role role;
     private boolean published;
 
     public UserEntity() {
     }
 
-    public UserEntity(String username, String password, Role role) {
+    public UserEntity(String username, String password, String email, Role role) {
         this.username = username;
         this.password = password;
+        this.email = email;
         this.role = role;
         this.published = false;
     }

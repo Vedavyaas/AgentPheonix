@@ -36,7 +36,7 @@ public class UserLoginService {
     public String createAccount(LoginRequest loginRequest) {
         if (userRepository.existsByUsername(loginRequest.username())) return "Username already exists";
 
-        UserEntity user = new UserEntity(loginRequest.username(), passwordEncoder.encode(loginRequest.password()), Role.USER);
+        UserEntity user = new UserEntity(loginRequest.username(), passwordEncoder.encode(loginRequest.password()), loginRequest.email(), Role.USER);
         userRepository.save(user);
         return "User created";
     }
@@ -54,5 +54,14 @@ public class UserLoginService {
 
     private String createScope(Authentication authentication) {
         return authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(" "));
+    }
+
+    public String resetPassword(String email, String newPassword) {
+        UserEntity user = userRepository.findByEmail(email);
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        userRepository.save(user);
+
+        return "Password reset successful";
     }
 }
