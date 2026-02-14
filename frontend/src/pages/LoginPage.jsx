@@ -22,7 +22,7 @@ const LoginPage = () => {
             const response = await login(credentials);
             if (response && response.token) {
                 localStorage.setItem('token', response.token);
-                navigate('/');
+                window.location.href = '/';
             } else {
                 setError('Login failed. Please check your credentials.');
             }
@@ -42,11 +42,11 @@ const LoginPage = () => {
             transition={{ duration: 0.3 }}
             className="glass-panel p-8 w-full max-w-md mx-auto relative overflow-hidden"
         >
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600"></div>
 
             <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 mb-4 border border-emerald-500/20 shadow-inner shadow-emerald-500/10">
-                    <User className="w-8 h-8 text-emerald-400" />
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/10 mb-4 border border-blue-500/20 shadow-inner shadow-blue-500/10">
+                    <User className="w-8 h-8 text-blue-400" />
                 </div>
                 <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">
                     Welcome Back
@@ -66,32 +66,32 @@ const LoginPage = () => {
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-1">
-                    <label className="text-xs font-medium text-emerald-400/80 ml-1 tracking-wide">USERNAME</label>
+                    <label className="text-xs font-medium text-blue-400/80 ml-1 tracking-wide">USERNAME</label>
                     <div className="relative group">
-                        <User className="absolute left-3 top-3.5 text-gray-500 w-5 h-5 group-focus-within:text-emerald-400 transition-colors" />
+                        <User className="absolute left-3 top-3.5 text-gray-500 w-5 h-5 group-focus-within:text-blue-400 transition-colors" />
                         <input
                             type="text"
                             name="username"
                             placeholder="Enter your username"
                             value={credentials.username}
                             onChange={handleChange}
-                            className="input-field pl-12 bg-gray-900/50 border-gray-700/50 focus:border-emerald-500/50 focus:bg-gray-900/80"
+                            className="input-field pl-12 bg-gray-900/50 border-gray-700/50 focus:border-blue-500/50 focus:bg-gray-900/80"
                             required
                         />
                     </div>
                 </div>
 
                 <div className="space-y-1">
-                    <label className="text-xs font-medium text-emerald-400/80 ml-1 tracking-wide">PASSWORD</label>
+                    <label className="text-xs font-medium text-blue-400/80 ml-1 tracking-wide">PASSWORD</label>
                     <div className="relative group">
-                        <Lock className="absolute left-3 top-3.5 text-gray-500 w-5 h-5 group-focus-within:text-emerald-400 transition-colors" />
+                        <Lock className="absolute left-3 top-3.5 text-gray-500 w-5 h-5 group-focus-within:text-blue-400 transition-colors" />
                         <input
                             type="password"
                             name="password"
                             placeholder="Enter your password"
                             value={credentials.password}
                             onChange={handleChange}
-                            className="input-field pl-12 bg-gray-900/50 border-gray-700/50 focus:border-emerald-500/50 focus:bg-gray-900/80"
+                            className="input-field pl-12 bg-gray-900/50 border-gray-700/50 focus:border-blue-500/50 focus:bg-gray-900/80"
                             required
                         />
                     </div>
@@ -100,7 +100,7 @@ const LoginPage = () => {
                 <div className="flex justify-end pt-1">
                     <Link
                         to="/forgot-password"
-                        className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors hover:underline decoration-emerald-400/30 underline-offset-4"
+                        className="text-xs text-blue-400 hover:text-blue-300 transition-colors hover:underline decoration-blue-400/30 underline-offset-4"
                     >
                         Forgot Password?
                     </Link>
@@ -125,7 +125,7 @@ const LoginPage = () => {
             <div className="mt-8 text-center pt-6 border-t border-gray-800">
                 <p className="text-gray-400 text-sm">
                     Don't have an account?{' '}
-                    <Link to="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors hover:underline decoration-emerald-400/30 underline-offset-4">
+                    <Link to="/register" className="text-blue-400 hover:text-blue-300 font-semibold transition-colors hover:underline decoration-blue-400/30 underline-offset-4">
                         Create Account
                     </Link>
                 </p>

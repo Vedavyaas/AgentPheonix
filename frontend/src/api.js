@@ -8,6 +8,21 @@ const api = axios.create({
     timeout: 10000, // 10 seconds
 });
 
+// Add request interceptor to attach JWT token to all requests
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
+
 export const login = async (credentials) => {
     const response = await api.post('/login/account', credentials);
     return response.data;
@@ -25,6 +40,27 @@ export const generateOtp = async (email) => {
 
 export const resetPassword = async (email, newPassword, otp) => {
     const response = await api.put(`/reset/password?email=${email}&newPassword=${newPassword}&otp=${otp}`);
+    return response.data;
+};
+
+// ProjectService API calls
+export const setGitCredentials = async (credentials) => {
+    const response = await api.post('/PROJECTSERVICE/set/credentials', credentials);
+    return response.data;
+};
+
+export const updateGitUsername = async (gitUsername) => {
+    const response = await api.put(`/PROJECTSERVICE/update/credentials/username?gitUsername=${gitUsername}`);
+    return response.data;
+};
+
+export const updateGitPAT = async (pat) => {
+    const response = await api.put(`/PROJECTSERVICE/update/credentials/pat?pat=${pat}`);
+    return response.data;
+};
+
+export const logout = async () => {
+    const response = await api.post('/logout');
     return response.data;
 };
 
