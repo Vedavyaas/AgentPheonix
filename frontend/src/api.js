@@ -59,6 +59,21 @@ export const updateGitPAT = async (pat) => {
     return response.data;
 };
 
+export const addGitRepository = async (gitDetails) => {
+    const response = await api.post('/PROJECTSERVICE/git/details/repo', gitDetails);
+    return response.data;
+};
+
+export const getAllProjects = async () => {
+    const response = await api.get('/PROJECTSERVICE/get/all');
+    return response.data;
+};
+
+export const deleteProject = async (id) => {
+    const response = await api.delete(`/PROJECTSERVICE/git/delete?id=${id}`);
+    return response.data;
+};
+
 export const logout = async () => {
     const response = await api.post('/logout');
     return response.data;
