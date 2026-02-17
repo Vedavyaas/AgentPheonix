@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FolderGit2, Plus, Trash2, RefreshCw } from 'lucide-react';
-import { getAllProjects, deleteProject } from '../api';
+import { FolderGit2, Plus, Trash2, RefreshCw, Play } from 'lucide-react';
+import { getAllProjects, deleteProject, startBuild } from '../api';
 import AddProjectModal from './AddProjectModal';
 
 const ProjectSidebar = () => {
@@ -9,6 +9,7 @@ const ProjectSidebar = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [deletingId, setDeletingId] = useState(null);
+    const [buildingId, setBuildingId] = useState(null);
 
     const fetchProjects = async () => {
         try {
@@ -47,6 +48,19 @@ const ProjectSidebar = () => {
 
     const handleProjectAdded = () => {
         fetchProjects();
+    };
+
+    const handleStartBuild = async (id) => {
+        try {
+            setBuildingId(id);
+            const message = await startBuild(id);
+            alert(message || 'Build started successfully!');
+        } catch (error) {
+            console.error('Failed to start build:', error);
+            alert('Failed to start build. Please try again.');
+        } finally {
+            setBuildingId(null);
+        }
     };
 
     return (
@@ -113,19 +127,35 @@ const ProjectSidebar = () => {
                                         </div>
                                     </div>
 
-                                    {/* Delete Button */}
-                                    <button
-                                        onClick={() => handleDelete(project.id)}
-                                        disabled={deletingId === project.id}
-                                        className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/20 rounded-lg transition-all text-red-400 disabled:opacity-50"
-                                        title="Delete project"
-                                    >
-                                        {deletingId === project.id ? (
-                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>
-                                        ) : (
-                                            <Trash2 className="w-4 h-4" />
-                                        )}
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        {/* Run Build Button */}
+                                        <button
+                                            onClick={() => handleStartBuild(project.id)}
+                                            disabled={buildingId === project.id}
+                                            className="opacity-0 group-hover:opacity-100 p-2 hover:bg-green-500/20 rounded-lg transition-all text-green-400 disabled:opacity-50"
+                                            title="Run build"
+                                        >
+                                            {buildingId === project.id ? (
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-400"></div>
+                                            ) : (
+                                                <Play className="w-4 h-4" />
+                                            )}
+                                        </button>
+
+                                        {/* Delete Button */}
+                                        <button
+                                            onClick={() => handleDelete(project.id)}
+                                            disabled={deletingId === project.id}
+                                            className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/20 rounded-lg transition-all text-red-400 disabled:opacity-50"
+                                            title="Delete project"
+                                        >
+                                            {deletingId === project.id ? (
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>
+                                            ) : (
+                                                <Trash2 className="w-4 h-4" />
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </motion.div>
                         ))

@@ -6,6 +6,8 @@ import com.pheonix.projectservice.repository.GitEntity;
 import com.pheonix.projectservice.repository.GitFolderEntity;
 import com.pheonix.projectservice.repository.GitFolderRepository;
 import com.pheonix.projectservice.repository.GitRepository;
+import com.pheonix.projectservice.repository.BuildRepository;
+import com.pheonix.projectservice.repository.BuildEntity;
 import jakarta.transaction.Transactional;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
@@ -31,10 +33,12 @@ import java.util.Optional;
 public class GitPullService {
     private final GitFolderRepository gitFolderRepository;
     private final GitRepository gitRepository;
+    private final BuildRepository buildRepository;
 
-    public GitPullService(GitFolderRepository gitFolderRepository, GitRepository gitRepository) {
+    public GitPullService(GitFolderRepository gitFolderRepository, GitRepository gitRepository, BuildRepository buildRepository) {
         this.gitFolderRepository = gitFolderRepository;
         this.gitRepository = gitRepository;
+        this.buildRepository = buildRepository;
     }
 
     @Transactional
@@ -50,7 +54,6 @@ public class GitPullService {
 
     @Scheduled(fixedDelay = 20_000)
     public void updateRepository() throws IOException {
-
         int pageSize = 50;
         int currentPage = 0;
         Page<GitFolderEntity> folderPage;
@@ -151,13 +154,30 @@ public class GitPullService {
         if (gitEntity.isEmpty()) return "User not found";
 
         if (gitFolderRepository.existsByGitEntityAndId(gitEntity.get(), id)) {
-            try {
-                deleteDirectory(new File(gitFolderRepository.findById(id).get().getStoredUrl()));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            Optional<GitFolderEntity> gitFolderEntity = gitFolderRepository.findById(id);
+            
+            if (gitFolderEntity.isPresent()) {
+                // Delete associated build entities first to avoid foreign key constraint violation
+                Optional<BuildEntity> buildEntity = buildRepository.findByGitFolderEntityAndBuildStart(gitFolderEntity.get(), true);
+                buildEntity.ifPresent(buildRepository::delete);
+                
+                // Delete the directory if it exists
+                String storedUrl = gitFolderEntity.get().getStoredUrl();
+                if (storedUrl != null && !storedUrl.isEmpty()) {
+                    try {
+                        File repoDir = new File(storedUrl);
+                        if (repoDir.exists()) {
+                            deleteDirectory(repoDir);
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                
+                // Now delete the project
+                gitFolderRepository.deleteById(id);
+                return "Project deleted.";
             }
-            gitFolderRepository.deleteById(id);
-            return "Project deleted.";
         }
         return "Project not found.";
     }

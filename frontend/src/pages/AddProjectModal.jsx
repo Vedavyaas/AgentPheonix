@@ -56,7 +56,7 @@ const AddProjectModal = ({ isOpen, onClose, onSuccess }) => {
 
         try {
             const response = await addGitRepository(formData);
-            setSuccess(response || 'Project added successfully!');
+            setSuccess('Project added successfully!');
 
             // Reset form
             setFormData({

@@ -17,15 +17,18 @@ public interface GitFolderRepository extends JpaRepository<GitFolderEntity, Long
     Optional<GitFolderEntity> findByGitEntity(GitEntity gitEntity);
 
     @Query("""
-       SELECT new com.pheonix.projectservice.assets.GitFolderDTO(
-           f.id,
-           f.fileName,
-           f.gitUrl, 
-           f.branch      
-       )
-       FROM GitFolderEntity f
-       WHERE f.gitEntity = :gitEntity
-       """)
+            SELECT new com.pheonix.projectservice.assets.GitFolderDTO(
+                f.id,
+                f.fileName,
+                f.gitUrl, 
+                f.branch      
+            )
+            FROM GitFolderEntity f
+            WHERE f.gitEntity = :gitEntity
+            """)
     List<GitFolderDTO> findByGitEntityy(GitEntity gitEntity);
+
     boolean existsByGitEntityAndId(GitEntity gitEntity, Long id);
+
+    Optional<GitFolderEntity> findByBranchAndGitUrlAndGitEntity_GitUsername(String branch, String gitUrl, String gitEntityGitUsername);
 }

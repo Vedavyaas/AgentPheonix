@@ -74,6 +74,11 @@ export const deleteProject = async (id) => {
     return response.data;
 };
 
+export const startBuild = async (id) => {
+    const response = await api.post(`/PROJECTSERVICE/start/build?id=${id}`);
+    return response.data;
+};
+
 export const logout = async () => {
     const response = await api.post('/logout');
     return response.data;
