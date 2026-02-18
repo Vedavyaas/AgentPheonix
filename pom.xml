@@ -12,5 +12,6 @@
     <module>GatewayService</module>
     <module>DiscoveryService</module>
     <module>ProjectService</module>
+    <module>DeploymentService</module>
   </modules>
 </project>

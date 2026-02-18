@@ -8,6 +8,7 @@ const api = axios.create({
     timeout: 10000, // 10 seconds
 });
 
+
 // Add request interceptor to attach JWT token to all requests
 api.interceptors.request.use(
     (config) => {
@@ -76,6 +77,27 @@ export const deleteProject = async (id) => {
 
 export const startBuild = async (id) => {
     const response = await api.post(`/PROJECTSERVICE/start/build?id=${id}`);
+    return response.data;
+};
+
+// DeploymentService API calls
+export const createCloudCredentials = async (credentials) => {
+    const response = await api.post('/DEPLOYMENTSERVICE/create/credentials/cloud', credentials);
+    return response.data;
+};
+
+export const updateCloudPAT = async (pat) => {
+    const response = await api.put(`/DEPLOYMENTSERVICE/update/credentials/pat?pat=${pat}`);
+    return response.data;
+};
+
+export const updateCloudRegion = async (region) => {
+    const response = await api.put(`/DEPLOYMENTSERVICE/update/credentials/region?region=${region}`);
+    return response.data;
+};
+
+export const updateCloudInfra = async (cloudInfrastructure) => {
+    const response = await api.put(`/DEPLOYMENTSERVICE/update/credential/infra?cloudInfrastructure=${cloudInfrastructure}`);
     return response.data;
 };
 
