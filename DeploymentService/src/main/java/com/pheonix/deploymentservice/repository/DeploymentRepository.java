@@ -8,4 +8,8 @@ public interface DeploymentRepository extends JpaRepository<DeploymentEntity, Lo
     boolean existsByUsername(String username);
 
     Optional<DeploymentEntity> findByUsername(String username);
+
+    Optional<DeploymentEntity> findByStoredUrl(String storedUrl);
+
+    boolean existsByStoredUrl(String storedUrl);
 }

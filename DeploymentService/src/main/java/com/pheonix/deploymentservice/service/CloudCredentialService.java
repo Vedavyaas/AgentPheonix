@@ -16,17 +16,17 @@ public class CloudCredentialService {
         this.deploymentRepository = deploymentRepository;
     }
 
-    public String makeDeployment(String username, CloudCredentials cloudCredentials) {
-        if (deploymentRepository.existsByUsername(username)) return "Credentials already exists.";
+    public String makeDeployment(String username, String storedUrl, CloudCredentials cloudCredentials) {
+        if (deploymentRepository.existsByStoredUrl(storedUrl)) return "Credentials already exists for this project.";
 
-        DeploymentEntity deploymentEntity = new DeploymentEntity(username, cloudCredentials.cloudInfrastructure(), cloudCredentials.pat(), cloudCredentials.region());
+        DeploymentEntity deploymentEntity = new DeploymentEntity(username, storedUrl, cloudCredentials.cloudInfrastructure(), cloudCredentials.pat(), cloudCredentials.region());
         deploymentRepository.save(deploymentEntity);
 
         return "Credentials stored";
     }
 
-    public String updatePat(String pat, String username) {
-        Optional<DeploymentEntity> deploymentEntity = deploymentRepository.findByUsername(username);
+    public String updatePat(String pat, String storedUrl) {
+        Optional<DeploymentEntity> deploymentEntity = deploymentRepository.findByStoredUrl(storedUrl);
 
         if (deploymentEntity.isEmpty()) return "Credentials doesnt exists.";
 
@@ -36,8 +36,8 @@ public class CloudCredentialService {
         return "PAT updated";
     }
 
-    public String updateRegion(String region, String username) {
-        Optional<DeploymentEntity> deploymentEntity = deploymentRepository.findByUsername(username);
+    public String updateRegion(String region, String storedUrl) {
+        Optional<DeploymentEntity> deploymentEntity = deploymentRepository.findByStoredUrl(storedUrl);
 
         if (deploymentEntity.isEmpty()) return "Credentials doesnt exists.";
 
@@ -47,8 +47,8 @@ public class CloudCredentialService {
         return "Region updated";
     }
 
-    public String updateCloudInfrastructure(CloudInfrastructure cloudInfrastructure, String username) {
-        Optional<DeploymentEntity> deploymentEntity = deploymentRepository.findByUsername(username);
+    public String updateCloudInfrastructure(CloudInfrastructure cloudInfrastructure, String storedUrl) {
+        Optional<DeploymentEntity> deploymentEntity = deploymentRepository.findByStoredUrl(storedUrl);
 
         if (deploymentEntity.isEmpty()) return "Credentials doesnt exists.";
 

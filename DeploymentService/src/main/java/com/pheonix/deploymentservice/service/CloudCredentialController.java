@@ -15,26 +15,23 @@ public class CloudCredentialController {
     }
 
     @PostMapping("/create/credentials/cloud")
-    public String createCloudCredentials(@RequestBody CloudCredentials cloudCredentials, @AuthenticationPrincipal Jwt jwt) {
+    public String createCloudCredentials(@RequestParam String storedUrl, @RequestBody CloudCredentials cloudCredentials, @AuthenticationPrincipal Jwt jwt) {
         String username = jwt.getSubject();
-        return cloudCredentialService.makeDeployment(username, cloudCredentials);
+        return cloudCredentialService.makeDeployment(username, storedUrl, cloudCredentials);
     }
 
     @PutMapping("/update/credentials/pat")
-    public String updatePat(@RequestParam String pat, @AuthenticationPrincipal Jwt jwt) {
-        String username = jwt.getSubject();
-        return cloudCredentialService.updatePat(pat, username);
+    public String updatePat(@RequestParam String pat, @RequestParam String storedUrl, @AuthenticationPrincipal Jwt jwt) {
+        return cloudCredentialService.updatePat(pat, storedUrl);
     }
 
     @PutMapping("/update/credentials/region")
-    public String updateRegion(@RequestParam String region, @AuthenticationPrincipal Jwt jwt) {
-        String username = jwt.getSubject();
-        return cloudCredentialService.updateRegion(region, username);
+    public String updateRegion(@RequestParam String region, @RequestParam String storedUrl, @AuthenticationPrincipal Jwt jwt) {
+        return cloudCredentialService.updateRegion(region, storedUrl);
     }
 
     @PutMapping("/update/credential/infra")
-    public String updateCloudInfra(@RequestParam CloudInfrastructure cloudInfrastructure, @AuthenticationPrincipal Jwt jwt) {
-        String username = jwt.getSubject();
-        return cloudCredentialService.updateCloudInfrastructure(cloudInfrastructure, username);
+    public String updateCloudInfra(@RequestParam CloudInfrastructure cloudInfrastructure, @RequestParam String storedUrl, @AuthenticationPrincipal Jwt jwt) {
+        return cloudCredentialService.updateCloudInfrastructure(cloudInfrastructure, storedUrl);
     }
 }

@@ -81,23 +81,23 @@ export const startBuild = async (id) => {
 };
 
 // DeploymentService API calls
-export const createCloudCredentials = async (credentials) => {
-    const response = await api.post('/DEPLOYMENTSERVICE/create/credentials/cloud', credentials);
+export const createCloudCredentials = async (storedUrl, credentials) => {
+    const response = await api.post(`/DEPLOYMENTSERVICE/create/credentials/cloud?storedUrl=${encodeURIComponent(storedUrl)}`, credentials);
     return response.data;
 };
 
-export const updateCloudPAT = async (pat) => {
-    const response = await api.put(`/DEPLOYMENTSERVICE/update/credentials/pat?pat=${pat}`);
+export const updateCloudPAT = async (pat, storedUrl) => {
+    const response = await api.put(`/DEPLOYMENTSERVICE/update/credentials/pat?pat=${encodeURIComponent(pat)}&storedUrl=${encodeURIComponent(storedUrl)}`);
     return response.data;
 };
 
-export const updateCloudRegion = async (region) => {
-    const response = await api.put(`/DEPLOYMENTSERVICE/update/credentials/region?region=${region}`);
+export const updateCloudRegion = async (region, storedUrl) => {
+    const response = await api.put(`/DEPLOYMENTSERVICE/update/credentials/region?region=${encodeURIComponent(region)}&storedUrl=${encodeURIComponent(storedUrl)}`);
     return response.data;
 };
 
-export const updateCloudInfra = async (cloudInfrastructure) => {
-    const response = await api.put(`/DEPLOYMENTSERVICE/update/credential/infra?cloudInfrastructure=${cloudInfrastructure}`);
+export const updateCloudInfra = async (cloudInfrastructure, storedUrl) => {
+    const response = await api.put(`/DEPLOYMENTSERVICE/update/credential/infra?cloudInfrastructure=${encodeURIComponent(cloudInfrastructure)}&storedUrl=${encodeURIComponent(storedUrl)}`);
     return response.data;
 };
 

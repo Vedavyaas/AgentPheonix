@@ -13,11 +13,13 @@ public class DeploymentEntity {
     private CloudInfrastructure cloudInfrastructure;
     private String pat;
     private String region;
+    private String storedUrl;
 
     public DeploymentEntity() {}
 
-    public DeploymentEntity(String username, CloudInfrastructure cloudInfrastructure, String pat, String region) {
+    public DeploymentEntity(String username, String storedUrl, CloudInfrastructure cloudInfrastructure, String pat, String region) {
         this.username = username;
+        this.storedUrl = storedUrl;
         this.cloudInfrastructure = cloudInfrastructure;
         this.pat = pat;
         this.region = region;
@@ -61,5 +63,13 @@ public class DeploymentEntity {
 
     public void setRegion(String region) {
         this.region = region;
+    }
+
+    public String getStoredUrl() {
+        return storedUrl;
+    }
+
+    public void setStoredUrl(String storedUrl) {
+        this.storedUrl = storedUrl;
     }
 }

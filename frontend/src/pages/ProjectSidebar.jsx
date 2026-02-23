@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FolderGit2, Plus, Trash2, RefreshCw, Play } from 'lucide-react';
+import { FolderGit2, Plus, Trash2, RefreshCw, Play, Cloud } from 'lucide-react';
 import { getAllProjects, deleteProject, startBuild } from '../api';
 import AddProjectModal from './AddProjectModal';
+import CloudCredentialsModal from './CloudCredentialsModal';
 
 const ProjectSidebar = () => {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [cloudModalOpen, setCloudModalOpen] = useState(false);
+    const [selectedStoredUrl, setSelectedStoredUrl] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [buildingId, setBuildingId] = useState(null);
 
@@ -27,6 +30,25 @@ const ProjectSidebar = () => {
     useEffect(() => {
         fetchProjects();
     }, []);
+
+    // Polling mechanism for projects that are still processing
+    useEffect(() => {
+        const hasPendingProjects = projects.some(p => !p.updated && !p.patFailure);
+        let intervalId;
+
+        if (hasPendingProjects) {
+            intervalId = setInterval(() => {
+                // Fetch silently without setting global loading state
+                getAllProjects()
+                    .then(data => setProjects(data || []))
+                    .catch(console.error);
+            }, 5000);
+        }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [projects]);
 
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this project?')) {
@@ -128,25 +150,57 @@ const ProjectSidebar = () => {
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        {/* Run Build Button */}
-                                        <button
-                                            onClick={() => handleStartBuild(project.id)}
-                                            disabled={buildingId === project.id}
-                                            className="opacity-0 group-hover:opacity-100 p-2 hover:bg-green-500/20 rounded-lg transition-all text-green-400 disabled:opacity-50"
-                                            title="Run build"
-                                        >
-                                            {buildingId === project.id ? (
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-400"></div>
-                                            ) : (
-                                                <Play className="w-4 h-4" />
-                                            )}
-                                        </button>
+                                        {/* Show processing status if project isn't ready and hasn't failed */}
+                                        {!project.updated && !project.patFailure ? (
+                                            <div className="flex items-center gap-2 text-blue-400 px-3 py-1.5 bg-blue-500/10 rounded-lg mr-2">
+                                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                                <span className="text-sm font-medium">Syncing repo...</span>
+                                            </div>
+                                        ) : project.patFailure ? (
+                                            <div className="flex items-center gap-2 text-red-400 px-3 py-1.5 bg-red-500/10 rounded-lg mr-2" title="Authentication failed. Please check your PAT.">
+                                                <span className="text-sm font-medium">Auth Failed</span>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {/* Run Build Button */}
+                                                <button
+                                                    onClick={() => handleStartBuild(project.id)}
+                                                    disabled={buildingId === project.id}
+                                                    className="p-2 hover:bg-green-500/20 rounded-lg transition-all text-green-400 disabled:opacity-50"
+                                                    title="Run build"
+                                                >
+                                                    {buildingId === project.id ? (
+                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-400"></div>
+                                                    ) : (
+                                                        <Play className="w-4 h-4" />
+                                                    )}
+                                                </button>
+
+                                                {/* Cloud Credentials Button */}
+                                                <button
+                                                    onClick={() => {
+                                                        if (!project.storedUrl) {
+                                                            alert('Project path (storedUrl) is not available. Please wait for the initial pull.');
+                                                            return;
+                                                        }
+                                                        setSelectedStoredUrl(project.storedUrl);
+                                                        setCloudModalOpen(true);
+                                                    }}
+                                                    className="p-2 hover:bg-violet-500/20 rounded-lg transition-all text-violet-400"
+                                                    title="Cloud Credentials"
+                                                >
+                                                    <Cloud className="w-4 h-4" />
+                                                </button>
+                                            </>
+                                        )}
+
+
 
                                         {/* Delete Button */}
                                         <button
                                             onClick={() => handleDelete(project.id)}
                                             disabled={deletingId === project.id}
-                                            className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/20 rounded-lg transition-all text-red-400 disabled:opacity-50"
+                                            className="p-2 hover:bg-red-500/20 rounded-lg transition-all text-red-400 disabled:opacity-50"
                                             title="Delete project"
                                         >
                                             {deletingId === project.id ? (
@@ -168,6 +222,13 @@ const ProjectSidebar = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSuccess={handleProjectAdded}
+            />
+
+            {/* Cloud Credentials Modal */}
+            <CloudCredentialsModal
+                isOpen={cloudModalOpen}
+                onClose={() => setCloudModalOpen(false)}
+                storedUrl={selectedStoredUrl}
             />
         </>
     );

@@ -21,7 +21,10 @@ public interface GitFolderRepository extends JpaRepository<GitFolderEntity, Long
                 f.id,
                 f.fileName,
                 f.gitUrl, 
-                f.branch      
+                f.branch,
+                f.storedUrl,
+                f.updated,
+                f.patFailure
             )
             FROM GitFolderEntity f
             WHERE f.gitEntity = :gitEntity
