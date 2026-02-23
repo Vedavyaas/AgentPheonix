@@ -1,6 +1,7 @@
 package com.pheonix.deploymentservice.repository;
 
 import com.pheonix.deploymentservice.assets.CloudInfrastructure;
+import com.pheonix.deploymentservice.assets.DeployStage;
 import jakarta.persistence.*;
 
 @Entity
@@ -14,6 +15,9 @@ public class DeploymentEntity {
     private String pat;
     private String region;
     private String storedUrl;
+    private boolean built;
+    @Enumerated(EnumType.STRING)
+    private DeployStage deploy;
 
     public DeploymentEntity() {}
 
@@ -23,6 +27,8 @@ public class DeploymentEntity {
         this.cloudInfrastructure = cloudInfrastructure;
         this.pat = pat;
         this.region = region;
+        this.built = false;
+        this.deploy = DeployStage.NOT_STARTED;
     }
 
     public void setId(Long id) {
@@ -71,5 +77,21 @@ public class DeploymentEntity {
 
     public void setStoredUrl(String storedUrl) {
         this.storedUrl = storedUrl;
+    }
+
+    public boolean isBuilt() {
+        return built;
+    }
+
+    public void setBuilt(boolean built) {
+        this.built = built;
+    }
+
+    public DeployStage isDeploy() {
+        return deploy;
+    }
+
+    public void setDeploy(DeployStage deploy) {
+        this.deploy = deploy;
     }
 }

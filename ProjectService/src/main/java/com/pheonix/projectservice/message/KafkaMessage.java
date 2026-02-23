@@ -32,9 +32,8 @@ public class KafkaMessage {
     public void sendPatFailureMessage() {
         int pageSize = 50;
         Page<GitFolderEntity> page;
-        int i = 0;
         do {
-            Pageable pageable = PageRequest.of(i++, pageSize);
+            Pageable pageable = PageRequest.of(0, pageSize);
             page = gitFolderRepository.findByPatFailure(true, pageable);
 
             for (GitFolderEntity folder : page.getContent()) {
@@ -49,10 +48,9 @@ public class KafkaMessage {
     public void sendBuildMessage() {
         int pageSize = 50;
         Page<BuildEntity> page;
-        int i = 0;
 
         do {
-            Pageable pageable = PageRequest.of(i++, pageSize);
+            Pageable pageable = PageRequest.of(0, pageSize);
             page = buildRepository.findByBuildMessageSentAndBuildStart(false, true, pageable);
 
             for (BuildEntity folder : page.getContent()) {

@@ -55,7 +55,6 @@ public class GitPullService {
     @Scheduled(fixedDelay = 20_000)
     public void updateRepository() throws IOException {
         int pageSize = 50;
-        int currentPage = 0;
         Page<GitFolderEntity> folderPage;
 
         File baseDir = Paths.get("repos").toAbsolutePath().toFile();
@@ -64,7 +63,7 @@ public class GitPullService {
         }
 
         do {
-            Pageable pageable = PageRequest.of(currentPage, pageSize);
+            Pageable pageable = PageRequest.of(0, pageSize);
             folderPage = gitFolderRepository.findByUpdated(false, pageable);
 
             for (GitFolderEntity folder : folderPage.getContent()) {
@@ -126,8 +125,6 @@ public class GitPullService {
                     e.printStackTrace();
                 }
             }
-
-            currentPage++;
 
         } while (folderPage.hasNext());
     }
