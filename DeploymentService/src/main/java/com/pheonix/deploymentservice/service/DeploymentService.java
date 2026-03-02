@@ -10,6 +10,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -54,6 +56,20 @@ public class DeploymentService {
 
     @Async
     public void deploy(DeploymentEntity folder) {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.command("vercel", "--prod", "--yes", "--token", folder.getPat());
+            processBuilder.directory(new File(folder.getStoredUrl()));
 
+            Process process = processBuilder.start();
+            int exitCode = process.waitFor();
+
+            if (exitCode == 0) {
+                folder.setDeploy(DeployStage.DEPLOYED);
+                deploymentRepository.save(folder);
+            }
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
