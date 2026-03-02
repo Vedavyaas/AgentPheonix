@@ -19,4 +19,6 @@ public interface DeploymentRepository extends JpaRepository<DeploymentEntity, Lo
     Optional<DeploymentEntity> findByStoredUrlAndUsername(String storedUrl, String username);
 
     Page<DeploymentEntity> findByDeployAndBuilt(DeployStage deploy, boolean built, Pageable pageable);
+
+    java.util.List<DeploymentEntity> findAllByUsername(String username);
 }

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FolderGit2, Plus, Trash2, RefreshCw, Play, Cloud } from 'lucide-react';
-import { getAllProjects, deleteProject, startBuild } from '../api';
+import { FolderGit2, Plus, Trash2, RefreshCw, Play, Cloud, ChevronDown, CheckCircle, ExternalLink } from 'lucide-react';
+import { getAllProjects, deleteProject, startBuild, startDeploy, getDeploymentStatuses } from '../api';
 import AddProjectModal from './AddProjectModal';
 import CloudCredentialsModal from './CloudCredentialsModal';
 
-const ProjectSidebar = () => {
+const ProjectSidebar = ({ selectedProject, setSelectedProject }) => {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,12 +13,24 @@ const ProjectSidebar = () => {
     const [selectedStoredUrl, setSelectedStoredUrl] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [buildingId, setBuildingId] = useState(null);
+    const [deployingId, setDeployingId] = useState(null);
+    const [openDropdownId, setOpenDropdownId] = useState(null);
 
     const fetchProjects = async () => {
         try {
             setLoading(true);
-            const data = await getAllProjects();
-            setProjects(data || []);
+            const [projectsData, deploymentData] = await Promise.all([
+                getAllProjects(),
+                getDeploymentStatuses().catch(() => []) // Catching in case DeploymentService is unreachable initially
+            ]);
+
+            // Merge deployment status into projects using storedUrl
+            const mergedProjects = (projectsData || []).map(p => {
+                const deployStatus = (deploymentData || []).find(d => d.storedUrl === p.storedUrl);
+                return { ...p, deploymentConfig: deployStatus };
+            });
+
+            setProjects(mergedProjects);
         } catch (error) {
             console.error('Failed to fetch projects:', error);
             setProjects([]);
@@ -33,15 +45,25 @@ const ProjectSidebar = () => {
 
     // Polling mechanism for projects that are still processing
     useEffect(() => {
-        const hasPendingProjects = projects.some(p => !p.updated && !p.patFailure);
+        const hasPendingProjects = projects.some(p =>
+            (!p.updated && !p.patFailure) ||
+            (p.deploymentConfig?.deploy === 'PENDING' || p.deploymentConfig?.deploy === 'MAY_FAIL_STAGE')
+        );
         let intervalId;
 
         if (hasPendingProjects) {
             intervalId = setInterval(() => {
                 // Fetch silently without setting global loading state
-                getAllProjects()
-                    .then(data => setProjects(data || []))
-                    .catch(console.error);
+                Promise.all([
+                    getAllProjects(),
+                    getDeploymentStatuses().catch(() => [])
+                ]).then(([projectsData, deploymentData]) => {
+                    const mergedProjects = (projectsData || []).map(p => {
+                        const deployStatus = (deploymentData || []).find(d => d.storedUrl === p.storedUrl);
+                        return { ...p, deploymentConfig: deployStatus };
+                    });
+                    setProjects(mergedProjects);
+                }).catch(console.error);
             }, 5000);
         }
 
@@ -82,6 +104,23 @@ const ProjectSidebar = () => {
             alert('Failed to start build. Please try again.');
         } finally {
             setBuildingId(null);
+        }
+    };
+
+    const handleStartDeploy = async (project) => {
+        if (!project.storedUrl) {
+            alert('Project path (storedUrl) is not available. Please wait for the initial pull.');
+            return;
+        }
+        try {
+            setDeployingId(project.id);
+            const message = await startDeploy(project.storedUrl);
+            alert(message || 'Deployment started successfully!');
+        } catch (error) {
+            console.error('Failed to start deployment:', error);
+            alert('Failed to start deployment. Please try again.');
+        } finally {
+            setDeployingId(null);
         }
     };
 
@@ -132,7 +171,11 @@ const ProjectSidebar = () => {
                                 key={project.id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="group bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all"
+                                onClick={() => setSelectedProject && setSelectedProject(project)}
+                                className={`group cursor-pointer rounded-lg p-4 transition-all ${selectedProject?.id === project.id
+                                    ? 'bg-white/10 border border-blue-500/50 ring-1 ring-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.2)]'
+                                    : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                                    }`}
                             >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex-1 min-w-0">
@@ -142,7 +185,7 @@ const ProjectSidebar = () => {
                                         <p className="text-xs text-gray-400 truncate mb-2">
                                             {project.gitUrl}
                                         </p>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center flex-wrap gap-2 mt-2">
                                             <span className="inline-flex items-center px-2 py-1 bg-blue-500/10 border border-blue-500/30 rounded text-xs text-blue-400">
                                                 {project.branch}
                                             </span>
@@ -151,64 +194,17 @@ const ProjectSidebar = () => {
 
                                     <div className="flex items-center gap-2">
                                         {/* Show processing status if project isn't ready and hasn't failed */}
-                                        {!project.updated && !project.patFailure ? (
-                                            <div className="flex items-center gap-2 text-blue-400 px-3 py-1.5 bg-blue-500/10 rounded-lg mr-2">
+                                        {!project.updated && !project.patFailure && (
+                                            <div className="flex items-center gap-2 text-blue-400 px-3 py-1.5 bg-blue-500/10 rounded-lg">
                                                 <RefreshCw className="w-4 h-4 animate-spin" />
                                                 <span className="text-sm font-medium">Syncing repo...</span>
                                             </div>
-                                        ) : project.patFailure ? (
-                                            <div className="flex items-center gap-2 text-red-400 px-3 py-1.5 bg-red-500/10 rounded-lg mr-2" title="Authentication failed. Please check your PAT.">
+                                        )}
+                                        {project.patFailure && (
+                                            <div className="flex items-center gap-2 text-red-400 px-3 py-1.5 bg-red-500/10 rounded-lg" title="Authentication failed. Please check your PAT.">
                                                 <span className="text-sm font-medium">Auth Failed</span>
                                             </div>
-                                        ) : (
-                                            <>
-                                                {/* Run Build Button */}
-                                                <button
-                                                    onClick={() => handleStartBuild(project.id)}
-                                                    disabled={buildingId === project.id}
-                                                    className="p-2 hover:bg-green-500/20 rounded-lg transition-all text-green-400 disabled:opacity-50"
-                                                    title="Run build"
-                                                >
-                                                    {buildingId === project.id ? (
-                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-400"></div>
-                                                    ) : (
-                                                        <Play className="w-4 h-4" />
-                                                    )}
-                                                </button>
-
-                                                {/* Cloud Credentials Button */}
-                                                <button
-                                                    onClick={() => {
-                                                        if (!project.storedUrl) {
-                                                            alert('Project path (storedUrl) is not available. Please wait for the initial pull.');
-                                                            return;
-                                                        }
-                                                        setSelectedStoredUrl(project.storedUrl);
-                                                        setCloudModalOpen(true);
-                                                    }}
-                                                    className="p-2 hover:bg-violet-500/20 rounded-lg transition-all text-violet-400"
-                                                    title="Cloud Credentials"
-                                                >
-                                                    <Cloud className="w-4 h-4" />
-                                                </button>
-                                            </>
                                         )}
-
-
-
-                                        {/* Delete Button */}
-                                        <button
-                                            onClick={() => handleDelete(project.id)}
-                                            disabled={deletingId === project.id}
-                                            className="p-2 hover:bg-red-500/20 rounded-lg transition-all text-red-400 disabled:opacity-50"
-                                            title="Delete project"
-                                        >
-                                            {deletingId === project.id ? (
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-400"></div>
-                                            ) : (
-                                                <Trash2 className="w-4 h-4" />
-                                            )}
-                                        </button>
                                     </div>
                                 </div>
                             </motion.div>

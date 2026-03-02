@@ -18,6 +18,7 @@ public class DeploymentEntity {
     private boolean built;
     @Enumerated(EnumType.STRING)
     private DeployStage deploy;
+    private String url;
 
     public DeploymentEntity() {}
 
@@ -29,6 +30,7 @@ public class DeploymentEntity {
         this.region = region;
         this.built = false;
         this.deploy = DeployStage.NOT_STARTED;
+        this.url = null;
     }
 
     public void setId(Long id) {
@@ -93,5 +95,17 @@ public class DeploymentEntity {
 
     public void setDeploy(DeployStage deploy) {
         this.deploy = deploy;
+    }
+
+    public DeployStage getDeploy() {
+        return deploy;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

@@ -27,7 +27,7 @@ public class JWTConfig {
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()));
         http.headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
-        http.authorizeHttpRequests(request -> request.requestMatchers("/h2-console/**", "/logout/**").permitAll().anyRequest().authenticated());
+        http.authorizeHttpRequests(request -> request.requestMatchers("/h2-console/**", "/logout/**", "/github/build/**").permitAll().anyRequest().authenticated());
 
         return http.build();
     }

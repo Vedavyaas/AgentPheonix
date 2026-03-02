@@ -1,15 +1,13 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:8777', // Assuming Gateway runs on 8777
+    baseURL: 'http://localhost:8777',
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 10000, // 10 seconds
+    timeout: 10000,
 });
 
-
-// Add request interceptor to attach JWT token to all requests
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -80,7 +78,15 @@ export const startBuild = async (id) => {
     return response.data;
 };
 
-// DeploymentService API calls
+export const getDeploymentStatuses = async () => {
+    const response = await api.get('/DEPLOYMENTSERVICE/projects/status');
+    return response.data;
+};
+
+export const startDeploy = async (storedUrl) => {
+    const response = await api.post(`/DEPLOYMENTSERVICE/project/deploy?storedUrl=${encodeURIComponent(storedUrl)}`);
+    return response.data;
+};
 export const createCloudCredentials = async (storedUrl, credentials) => {
     const response = await api.post(`/DEPLOYMENTSERVICE/create/credentials/cloud?storedUrl=${encodeURIComponent(storedUrl)}`, credentials);
     return response.data;

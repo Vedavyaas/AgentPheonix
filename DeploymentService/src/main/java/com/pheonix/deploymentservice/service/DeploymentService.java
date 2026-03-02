@@ -10,9 +10,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Optional;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.*;
 
 @Service
 public class DeploymentService {
@@ -57,19 +57,52 @@ public class DeploymentService {
     @Async
     public void deploy(DeploymentEntity folder) {
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.command("vercel", "--prod", "--yes", "--token", folder.getPat());
-            processBuilder.directory(new File(folder.getStoredUrl()));
+            String localPath = folder.getStoredUrl();
+            String pat = folder.getPat();
 
-            Process process = processBuilder.start();
+            ProcessBuilder pb = new ProcessBuilder(
+                    "/opt/homebrew/bin/vercel",
+                    "--cwd", localPath,
+                    "--token", pat,
+                    "--yes",
+                    "--prod"
+            );
+
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            String deploymentUrl = "";
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println("[Vercel CLI]: " + line);
+                    java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("(https://[a-zA-Z0-9-]+\\.vercel\\.app)").matcher(line);
+                    if (matcher.find()) {
+                        deploymentUrl = matcher.group(1);
+                        DeploymentEntity liveFolder = deploymentRepository.findById(folder.getId()).orElse(folder);
+                        liveFolder.setUrl(deploymentUrl);
+                        deploymentRepository.save(liveFolder);
+                    }
+                }
+            }
+
             int exitCode = process.waitFor();
+            
+            DeploymentEntity finalFolder = deploymentRepository.findById(folder.getId()).orElse(folder);
 
             if (exitCode == 0) {
-                folder.setDeploy(DeployStage.DEPLOYED);
-                deploymentRepository.save(folder);
+                finalFolder.setDeploy(DeployStage.DEPLOYED);
+                finalFolder.setUrl(deploymentUrl);
+                deploymentRepository.save(finalFolder);
+            } else {
+                finalFolder.setDeploy(DeployStage.FAILED);
+                deploymentRepository.save(finalFolder);
             }
-        } catch (IOException | InterruptedException e) {
-            Thread.currentThread().interrupt();
+
+        } catch (Exception e) {
+            System.err.println("CLI Deployment Error: " + e.getMessage());
+            DeploymentEntity errorFolder = deploymentRepository.findById(folder.getId()).orElse(folder);
+            errorFolder.setDeploy(DeployStage.FAILED);
+            deploymentRepository.save(errorFolder);
         }
     }
 }
