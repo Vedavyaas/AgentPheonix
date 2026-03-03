@@ -54,7 +54,6 @@ public class DeploymentService {
         } while (folderPage.hasNext());
     }
 
-    @Async
     public void deploy(DeploymentEntity folder) {
         try {
             String localPath = folder.getStoredUrl();
