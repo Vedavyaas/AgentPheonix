@@ -273,6 +273,4 @@ The current `BuildService` uses a local Ollama LLM to generate bash build script
 - **Fine-tuned models** — Evaluate smaller, build-specific fine-tuned models to reduce latency and improve reliability over a general-purpose LLM.
 - **Build caching** — Cache dependency layers between builds (e.g. reuse `node_modules`, `.m2`, `.gradle`) so repeat builds are significantly faster.
 - **Streaming logs** — Stream build output back to the frontend in real time via WebSockets or Server-Sent Events instead of polling for status.
-- **Post-build test execution** — After a successful build, optionally run the project's test suite and gate deployment on pass/fail.
 - **Build history & logs** — Store full build logs per run so users can inspect past outputs and debug failures without re-triggering a build.
-- **Docker fallback** — If the LLM-generated script fails after all retries, fall back to building the project inside an appropriate language-versioned Docker container as a last resort.
