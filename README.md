@@ -55,8 +55,6 @@ A full-stack, AI-powered cloud deployment platform built as a microservices arch
   4. Executes the build script (up to **3 retries** with error feedback to the LLM)
   5. Publishes a success/failure result to the **`deployment`** Kafka topic
 - Supports any build system detected from files: `Makefile`, `Dockerfile`, `pom.xml`, `package.json`, `requirements.txt`, `go.mod`, `Cargo.toml`, etc.
-- Static-only projects (HTML/CSS/JS, no framework) are detected and passed through instantly
-
 ---
 
 ### 6. Frontend (`/frontend`)
